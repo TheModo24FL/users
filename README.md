@@ -1,7 +1,7 @@
 # Proiect: Gestionarea Utilizatorilor
 
 Acest proiect va fi realizat utilizând HTML, CSS și JavaScript prin crearea unei aplicații web interactive pentru gestionarea utilizatorilor. Scopul proiectului este de a oferi o experiență practică în dezvoltarea interfeței utilizator și implementarea funcționalităților de bază necesare într-o aplicație web autentică.
-Utilizatorii vor putea să își creeze un cont, să se autentifice, să își vizualizeze și editeze profilul, precum și să se deconecteze. Prin acest proces, începătorii vor învăța concepte fundamentale legate de formulare HTML, stilizare cu CSS și interactivitate prin JavaScript.
+Utilizatorii vor putea să își creeze un cont, să se autentifice, să își vizualizeze și editeze profilul, precum și să se deconecteze. Prin acest proces, vei învăța concepte fundamentale legate de formulare HTML, stilizare cu CSS și interactivitate prin JavaScript.
 
 ## Functionalitati
 - **Inregistrare utilizator** - Crearea unui cont nou cu email si parola.

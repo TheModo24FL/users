@@ -17,7 +17,7 @@ let users = [];
 app.post('/register', (req, res) => {
     const { email, password } = req.body;
     users.push({ email, password });
-    res.redirect('/pages/login.html');
+    res.redirect('/login');
 });
 
 app.post('/login', (req, res) => {
@@ -25,7 +25,7 @@ app.post('/login', (req, res) => {
     const user = users.find(u => u.email === email && u.password === password);
     if (user) {
         req.session.user = user;
-        res.redirect('/pages/profile.html');
+        res.redirect('/profile');
     } else {
         res.send('Invalid credentials');
     }
@@ -40,26 +40,35 @@ app.get('/profile', (req, res) => {
             <script>
                 function logout() {
                     fetch('/logout').then(() => {
-                        window.location.href = '/pages/login.html';
+                        window.location.href = '/login';
                     });
                 }
             </script>
         `);
     } else {
-        res.redirect('/pages/login.html');
+        res.redirect('/login');
     }
 });
 
 app.get('/logout', (req, res) => {
     req.session.destroy();
-    res.redirect('/pages/login.html');
+    res.redirect('/login');
 });
 
 app.use(express.static(path.join(__dirname, 'proiect-gestionare-utilizatori')));
 
-app.get('*', (req, res) => {
+app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '/pages/index.html'));
 });
+
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, '/pages/login.html'));
+});
+
+app.get('/register', (req, res) => {
+    res.sendFile(path.join(__dirname, '/pages/register.html'));
+});
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);

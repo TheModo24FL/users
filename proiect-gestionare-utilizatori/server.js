@@ -39,6 +39,7 @@ app.get("/profile", (req, res) => {
             <h1>Profile</h1>
             <p>Welcome, ${req.session.user.email}</p>
             <button onclick="editEmail()">Edit email</button>
+            <button onclick="editPassword()">Edit password</button>
             <button onclick="logout()">Logout</button>
             <script>
                 function logout() {
@@ -47,7 +48,10 @@ app.get("/profile", (req, res) => {
                     });
                 }
                 function editEmail() {
-                    window.location.href = '/edit';
+                    window.location.href = '/editEmail';
+                }
+                 function editPassword() {
+                    window.location.href = '/editPassword';
                 }
             </script>
         `);
@@ -56,7 +60,7 @@ app.get("/profile", (req, res) => {
   }
 });
 
-app.put("/editEmail", (req, res) => {});
+
 app.get("/logout", (req, res) => {
   req.session.destroy();
   res.redirect("/login");
@@ -76,7 +80,7 @@ app.get("/register", (req, res) => {
   res.sendFile(path.join(__dirname, "/pages/register.html"));
 });
 
-app.get("/edit", (req, res) => {
+app.get("/editEmail", (req, res) => {
   if (req.session.user) {
     res.send(`
             <h1>Edit email</h1>
@@ -93,10 +97,29 @@ app.get("/edit", (req, res) => {
   }
 });
 
+app.get("/editPassword", (req, res) => {
+    if (req.session.user) {
+      res.send(`
+              <h1>Edit password</h1>
+              <form action="/updatePassword" method="POST">
+                  <label for="password">Current password:</label>
+                  <input type="password" id="password" name="password" required>
+                  <label for="newPassword">New Password:</label>
+                  <input type="password" id="newPassword" name="newPassword" required>
+                  <button type="submit">Submit</button>
+              </form>
+          `);
+    } else {
+      res.redirect("/login");
+    }
+  });
+
 app.post("/updateEmail", (req, res) => {
     const { newEmail } = req.body;
     if (req.session.user){
-        req.session.user.email = newEmail;
+        const user = users.find((u) => u.email === req.session.user.email);
+        user.email = newEmail;
+        req.session.user = user;
         res.redirect("/profile");
     }
     else{
@@ -104,6 +127,23 @@ app.post("/updateEmail", (req, res) => {
     }
   });
 
+app.post("/updatePassword", (req, res) => {
+    const { password, newPassword } = req.body;
+    if (req.session.user){
+        const user = users.find((u) => u.email === req.session.user.email);
+        if (password === req.session.user.password){
+            user.password = newPassword;
+            req.session.user = user;
+            res.redirect("/profile")
+        }
+        else{
+            res.send("Incorrect password")
+        }
+    }
+    else{
+        res.redirect("/login")
+    }
+  });
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });

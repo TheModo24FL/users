@@ -13,6 +13,8 @@ Utilizatorii vor putea să își creeze un cont, să se autentifice, să își v
 - **HTML** - Structura paginilor web.
 - **CSS** - Stilizarea paginilor pentru un design atractiv.
 - **JavaScript** - Functionalitati dinamice si interactiuni cu utilizatorul.
+- **Node.js** - Backend pentru gestionarea autentificarii si sesiunilor utilizatorilor.
+- **Express** - Framework pentru Node.js pentru a crea serverul web.
 
 ## Structura proiectului
 ```
@@ -27,6 +29,8 @@ Utilizatorii vor putea să își creeze un cont, să se autentifice, să își v
  ┃ ┣ register.html
  ┃ ┣ profile.html
  ┃ ┗ index.html
+ ┣ 📜 package.json
+ ┣ 📜 server.js
  ┣ README.md
 ```
 
@@ -35,13 +39,19 @@ Utilizatorii vor putea să își creeze un cont, să se autentifice, să își v
    ```sh
    git clone https://github.com/TheModo24FL/users.git
    ```
-2. Creează pe rând fiecare fișier după structura dată mai sus.
-3. Partajează periodic stadiul actualizărilor făcând pull la modificări astfel:
+2. Navigheaza in directorul proiectului:
    ```sh
-   git add .
-   git commit -m "Detalii despre actualizari"
-   git push origin main
+   cd proiect-gestionare-utilizatori
    ```
+3. Instaleaza dependintele:
+   ```sh
+   npm install
+   ```
+4. Porneste serverul:
+   ```sh
+   npm start
+   ```
+5. Deschide browser-ul si navigheaza la `http://localhost:3000/pages/index.html` pentru a accesa aplicatia.
 
 ## Contact
 Daca ai intrebari sau sugestii, ma poti contacta oricand.

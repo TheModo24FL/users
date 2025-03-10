@@ -10,10 +10,23 @@
 
 <body>
     <h1>Profile</h1>
-    <p>Welcome, [User's Name]</p>
-    <p>Email: [User's Email]</p>
+    <div id="profile-info"></div>
     <button onclick="logout()">Logout</button>
-    <script src="../assets/js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            fetch('/profile')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('profile-info').innerHTML = data;
+                });
+        });
+
+        function logout() {
+            fetch('/logout').then(() => {
+                window.location.href = '/pages/login.html';
+            });
+        }
+    </script>
 </body>
 
 </html>

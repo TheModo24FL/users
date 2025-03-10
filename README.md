@@ -25,8 +25,8 @@ Utilizatorii vor putea să își creeze un cont, să se autentifice, să își v
  ┣ 📂 pages
  ┃ ┣ login.html
  ┃ ┣ register.html
- ┃ ┗ profile.html
- ┣ index.html
+ ┃ ┣ profile.html
+ ┃ ┗ index.html
  ┣ README.md
 ```
 
@@ -40,7 +40,7 @@ Utilizatorii vor putea să își creeze un cont, să se autentifice, să își v
    ```sh
    git add .
    git commit -m "Detalii despre actualizari"
-   git push
+   git push origin main
    ```
 
 ## Contact

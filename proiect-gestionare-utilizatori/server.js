@@ -66,6 +66,8 @@ app.get("/logout", (req, res) => {
   res.redirect("/login");
 });
 
+app.use('/assets', express.static(path.join(__dirname, 'assets')))
+
 app.use(express.static(path.join(__dirname, "proiect-gestionare-utilizatori")));
 
 app.get("/", (req, res) => {

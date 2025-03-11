@@ -116,3 +116,64 @@ input {
 #submit-button:hover {
     background-color: #15115a;
 }
+
+#edit-email-button{
+    padding: 10px;
+    font-size: 18px;
+    border-radius: 10px;
+    width: 150px;
+    display: inline-flex;
+    justify-content: center; 
+    align-items: center; 
+    border: 2px solid #211C84;
+    color: #211C84;
+    background-color: white;
+    cursor: pointer;
+}
+
+#edit-pass-button{
+    padding: 10px;
+    font-size: 18px;
+    border-radius: 10px;
+    width: 150px;
+    display: inline-flex;
+    justify-content: center; 
+    align-items: center; 
+    border: 2px solid #211C84;
+    color: white;
+    background-color: #211C84;
+    cursor: pointer;
+    margin-left:15px;
+}
+
+#edit-pass-button:hover {
+    background-color: #15115a;
+}
+
+#edit-email-button:hover {
+    background-color: #e4e4e6;
+}
+
+#welcome-message{
+    font-size: 23px;
+    margin-top: -10px;
+}
+
+#logout-button{
+    width: 320px;
+    border: 2px solid #211C84;
+    color: #211C84;
+    padding: 10px;
+    font-size: 18px;
+    border-radius: 10px;
+    display: inline-flex;
+    justify-content: center; 
+    align-items: center; 
+    margin-top: -70px;
+    background-color: white;
+    cursor: pointer;
+}
+
+#logout-button:hover {
+    background-color: #e4e4e6;
+}

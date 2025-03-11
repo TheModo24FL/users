@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const session = require("express-session");
 const path = require("path");
 const app = express();
+const sqlite3 = require("sqlite3").verbose();
 const PORT = 3000;
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -14,6 +15,15 @@ app.use(
   })
 );
 
+const db = new sqlite3.Database("usersDB.db");
+db.run(
+  `CREATE TABLE IF NOT EXISTS users ( id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT, password TEXT)`
+);
+const insertUser = (email, password) => {
+  const stmt = db.prepare("INSERT INTO users (email, password) VALUES (?,?)");
+  stmt.run(email, password);
+  stmt.finalize();
+};
 let users = [];
 
 app.post("/register", (req, res) => {
@@ -35,36 +45,29 @@ app.post("/login", (req, res) => {
 
 app.get("/profile", (req, res) => {
   if (req.session.user) {
-    res.send(`
-            <h1>Profile</h1>
-            <p>Welcome, ${req.session.user.email}</p>
-            <button onclick="editEmail()">Edit email</button>
-            <button onclick="editPassword()">Edit password</button>
-            <button onclick="logout()">Logout</button>
-            <script>
-                function logout() {
-                    fetch('/logout').then(() => {
-                        window.location.href = '/login';
-                    });
-                }
-                function editEmail() {
-                    window.location.href = '/editEmail';
-                }
-                 function editPassword() {
-                    window.location.href = '/editPassword';
-                }
-            </script>
-        `);
+    res.sendFile(path.join(__dirname, "/pages/profile.html"));
   } else {
     res.redirect("/login");
   }
 });
 
+app.get("/userData", (req, res) => {
+  if (req.session.user) {
+    res.json({
+      email: req.session.user.email,
+      password: req.session.user.password,
+    });
+  } else {
+    res.status(401).json({ error: "User not logged in" });
+  }
+});
 
 app.get("/logout", (req, res) => {
   req.session.destroy();
   res.redirect("/login");
 });
+
+app.use("/assets", express.static(path.join(__dirname, "assets")));
 
 app.use(express.static(path.join(__dirname, "proiect-gestionare-utilizatori")));
 
@@ -81,69 +84,40 @@ app.get("/register", (req, res) => {
 });
 
 app.get("/editEmail", (req, res) => {
+  res.sendFile(path.join(__dirname, "/pages/editEmail.html"));
+});
+
+app.get("/editPassword", (req, res) => {
+  res.sendFile(path.join(__dirname, "/pages/editPassword.html"));
+});
+
+app.post("/updateEmail", (req, res) => {
+  const { newEmail } = req.body;
   if (req.session.user) {
-    res.send(`
-            <h1>Edit email</h1>
-            <form action="/updateEmail" method="POST">
-                <label for="email">Current email:</label>
-                <input type="email" id="email" name="email" value="${req.session.user.email}" readonly>
-                <label for="newEmail">New Email:</label>
-                <input type="email" id="newEmail" name="newEmail" required>
-                <button type="submit">Submit</button>
-            </form>
-        `);
+    const user = users.find((u) => u.email === req.session.user.email);
+    user.email = newEmail;
+    req.session.user = user;
+    res.redirect("/profile");
   } else {
     res.redirect("/login");
   }
 });
 
-app.get("/editPassword", (req, res) => {
-    if (req.session.user) {
-      res.send(`
-              <h1>Edit password</h1>
-              <form action="/updatePassword" method="POST">
-                  <label for="password">Current password:</label>
-                  <input type="password" id="password" name="password" required>
-                  <label for="newPassword">New Password:</label>
-                  <input type="password" id="newPassword" name="newPassword" required>
-                  <button type="submit">Submit</button>
-              </form>
-          `);
-    } else {
-      res.redirect("/login");
-    }
-  });
-
-app.post("/updateEmail", (req, res) => {
-    const { newEmail } = req.body;
-    if (req.session.user){
-        const user = users.find((u) => u.email === req.session.user.email);
-        user.email = newEmail;
-        req.session.user = user;
-        res.redirect("/profile");
-    }
-    else{
-        res.redirect("/login")
-    }
-  });
-
 app.post("/updatePassword", (req, res) => {
-    const { password, newPassword } = req.body;
-    if (req.session.user){
-        const user = users.find((u) => u.email === req.session.user.email);
-        if (password === req.session.user.password){
-            user.password = newPassword;
-            req.session.user = user;
-            res.redirect("/profile")
-        }
-        else{
-            res.send("Incorrect password")
-        }
+  const { password, newPassword } = req.body;
+  if (req.session.user) {
+    const user = users.find((u) => u.email === req.session.user.email);
+    if (password === req.session.user.password) {
+      user.password = newPassword;
+      req.session.user = user;
+      res.redirect("/profile");
+    } else {
+      res.send("Incorrect password");
     }
-    else{
-        res.redirect("/login")
-    }
-  });
+  } else {
+    res.redirect("/login");
+  }
+});
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });

@@ -1,32 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../assets/css/styles.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/assets/css/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap"
+      rel="stylesheet"
+    />
     <title>Profile</title>
-</head>
+  </head>
 
-<body>
-    <h1>Profile</h1>
-    <div id="profile-info"></div>
-    <button onclick="logout()">Logout</button>
+  <body>
+    <header></header>
+    <div class="box">
+      <h1 id="title">Profile</h1>
+      <p id="welcome-message">Welcome, <span id="email" style="color: #211C84"></span></p>
+      <div id="button-group">
+        <button id="edit-email-button" onclick="editEmail()">Edit email</button>
+        <button id="edit-pass-button" onclick="editPassword()">Edit password</button>
+      </div>
+      <button id="logout-button" onclick="logout()">Logout</button>
+    </div>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            fetch('/profile')
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById('profile-info').innerHTML = data;
-                });
+      document.addEventListener("DOMContentLoaded", function () {
+        fetch("/userData")
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById("email").innerHTML = data.email;
+          });
+      });
+      function editEmail() {
+        window.location.href = "/editEmail";
+      }
+      function editPassword() {
+        window.location.href = "/editPassword";
+      }
+      function logout() {
+        fetch("/logout").then(() => {
+          window.location.href = "/login";
         });
-
-        function logout() {
-            fetch('/logout').then(() => {
-                window.location.href = '/login';
-            });
-        }
+      }
     </script>
-</body>
-
+  </body>
 </html>

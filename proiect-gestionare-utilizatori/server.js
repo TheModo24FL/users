@@ -5,6 +5,7 @@ const path = require("path");
 const app = express();
 const sqlite3 = require("sqlite3").verbose();
 const PORT = 3000;
+const { hashPassword, comparePasswords } = require("./assets/js/script.js");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(
@@ -24,23 +25,42 @@ const insertUser = (email, password) => {
   stmt.run(email, password);
   stmt.finalize();
 };
-let users = [];
 
-app.post("/register", (req, res) => {
+app.post("/register", async (req, res) => {
   const { email, password } = req.body;
-  users.push({ email, password });
+  db.get("SELECT * FROM users WHERE email = ?", [email], async (error, row) => {
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+    if (row) {
+      return res
+        .status(400)
+        .json({ error: "Email associated already with an account" });
+    }
+    const hashedPassword = await hashPassword(password);
+    insertUser(email, hashedPassword);
+  });
   res.redirect("/login");
 });
 
-app.post("/login", (req, res) => {
+app.post("/login", async (req, res) => {
   const { email, password } = req.body;
-  const user = users.find((u) => u.email === email && u.password === password);
-  if (user) {
-    req.session.user = user;
-    res.redirect("/profile");
-  } else {
-    res.send("Invalid credentials");
-  }
+  db.get("SELECT * FROM users WHERE email = ?", [email], async (error, row) => {
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+    if (row) {
+      const match = await comparePasswords(password, row.password);
+      if (match) {
+        req.session.user = row;
+        return res.redirect("/profile");
+      } else {
+        return res.status(400).json({ error: "Invalid credentials" });
+      }
+    } else {
+      return res.status(400).json({ error: "Invalid credentials" });
+    }
+  });
 });
 
 app.get("/profile", (req, res) => {
@@ -59,6 +79,53 @@ app.get("/userData", (req, res) => {
     });
   } else {
     res.status(401).json({ error: "User not logged in" });
+  }
+});
+
+app.post("/updateEmail", (req, res) => {
+  const { newEmail } = req.body;
+  if (req.session.user) {
+    const currentEmail = req.session.user.email;
+    db.run("UPDATE users SET email = ? WHERE email = ?", [
+      newEmail,
+      currentEmail,
+    ]);
+    req.session.user.email = newEmail;
+    res.redirect("/profile");
+  } else {
+    res.redirect("/login");
+  }
+});
+
+app.post("/updatePassword", async (req, res) => {
+  const { password, newPassword } = req.body;
+  if (req.session.user) {
+    const currentEmail = req.session.user.email;
+    db.get(
+      "SELECT * FROM users WHERE email = ?",
+      [currentEmail],
+      async (error, row) => {
+        if (error) {
+          return res.status(500).json({ error: error.message });
+        }
+        if (row) {
+          const match = await comparePasswords(password, row.password);
+          const hashedPassword = await hashPassword(newPassword);
+          if (match) {
+            db.run("UPDATE users SET password = ? WHERE email = ?", [
+              hashedPassword,
+              currentEmail,
+            ]);
+            req.session.user.password = hashedPassword;
+            return res.redirect("/profile");
+          } else {
+            return res.status(400).json({ error: "Incorrect password" });
+          }
+        }
+      }
+    );
+  } else {
+    res.redirect("/login");
   }
 });
 
@@ -91,33 +158,6 @@ app.get("/editPassword", (req, res) => {
   res.sendFile(path.join(__dirname, "/pages/editPassword.html"));
 });
 
-app.post("/updateEmail", (req, res) => {
-  const { newEmail } = req.body;
-  if (req.session.user) {
-    const user = users.find((u) => u.email === req.session.user.email);
-    user.email = newEmail;
-    req.session.user = user;
-    res.redirect("/profile");
-  } else {
-    res.redirect("/login");
-  }
-});
-
-app.post("/updatePassword", (req, res) => {
-  const { password, newPassword } = req.body;
-  if (req.session.user) {
-    const user = users.find((u) => u.email === req.session.user.email);
-    if (password === req.session.user.password) {
-      user.password = newPassword;
-      req.session.user = user;
-      res.redirect("/profile");
-    } else {
-      res.send("Incorrect password");
-    }
-  } else {
-    res.redirect("/login");
-  }
-});
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });

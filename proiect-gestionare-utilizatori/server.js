@@ -98,9 +98,9 @@ app.get("/profile", verifyToken, (req, res) => {
 app.get("/userData", verifyToken, (req, res) => {
   const userId = req.user.id;
   db.get("SELECT email FROM users WHERE id = ?", [userId], (error, row) => {
-    if (error){
+    if (error) {
       console.error("DB error", error.message);
-      return res.status(500).json({error: "DB error"});
+      return res.status(500).json({ error: "DB error" });
     }
     res.json({
       email: row.email,
@@ -108,15 +108,11 @@ app.get("/userData", verifyToken, (req, res) => {
   });
 });
 
-
 app.post("/updateEmail", verifyToken, (req, res) => {
   const { newEmail } = req.body;
   if (req.user.id) {
     const userId = req.user.id;
-    db.run("UPDATE users SET email = ? WHERE id = ?", [
-      newEmail,
-      userId,
-    ]);
+    db.run("UPDATE users SET email = ? WHERE id = ?", [newEmail, userId]);
     res.redirect("/profile");
   } else {
     res.redirect("/login");
@@ -158,6 +154,14 @@ app.post("/updatePassword", verifyToken, async (req, res) => {
   }
 });
 
+app.get("/isLoggedIn", (req, res) => {
+  if (req.cookies && req.cookies.token) {
+    res.json({ loggedIn: true });
+  } else {
+    res.json({ loggedIn: false });
+  }
+});
+
 app.get("/logout", (req, res) => {
   res.clearCookie("token");
   res.redirect("/login");
@@ -173,6 +177,14 @@ app.get("/", (req, res) => {
 
 app.get("/login", (req, res) => {
   res.sendFile(path.join(__dirname, "/pages/login.html"));
+});
+
+app.get("/about", (req, res) => {
+  res.sendFile(path.join(__dirname, "/pages/about.html"));
+});
+
+app.get("/help", (req, res) => {
+  res.sendFile(path.join(__dirname, "/pages/help.html"));
 });
 
 app.get("/register", (req, res) => {

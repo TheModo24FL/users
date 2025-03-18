@@ -14,7 +14,21 @@
   </head>
 
   <body>
-    <header></header>
+    <nav>
+      <p class="logo">APP LOGO</p>
+      <div class="menu-buttons">
+        <button class="menu-button" onclick="window.location.href = '/';">Home</button>
+        <button class="menu-button" onclick="window.location.href = '/about';">About</button>
+        <button class="menu-button" onclick="window.location.href = '/login';">Help</button>
+      </div>
+      <div class="user-buttons">
+        <div>
+          <a id="login-button" class="logged-out" href="/login">Login</a>
+          <a id="register-button" class="logged-out" href="/register">Register</a>
+        </div>
+        <a id="register-button" class="logged-in" href="/profile">Profile</a>
+      </div>
+    </nav>
     <div class="box">
       <h1 id="title">Profile</h1>
       <p id="welcome-message">Welcome, <span id="email" style="color: #211C84"></span></p>
@@ -32,6 +46,17 @@
             document.getElementById("email").innerHTML = data.email;
           });
       });
+      fetch("/isLoggedIn")
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.loggedIn) {
+            document.querySelectorAll(".logged-out").forEach((button) => {
+              button.style.display = "none";
+            });
+          } else {
+            document.querySelector(".logged-in").style.display = "none";
+          }
+        });
       function editEmail() {
         window.location.href = "/editEmail";
       }

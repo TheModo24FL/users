@@ -10,9 +10,8 @@
       href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap"
       rel="stylesheet"
     />
-    <title>Edit email</title>
+    <title>About</title>
   </head>
-
   <body>
     <nav>
       <p class="logo">APP LOGO</p>
@@ -29,28 +28,13 @@
         <a id="register-button" class="logged-in" href="/profile">Profile</a>
       </div>
     </nav>
-    <div class="box">
-      <h1 id="title">Edit email</h1>
-      <form action="/updateEmail" method="POST" class="form">
-        <div id="input">
-          <label for="email">Current email:</label>
-          <input type="email" id="email" name="email" readonly/>
-        </div>
-        <div id="input">
-          <label for="newEmail">New Email:</label>
-          <input type="email" id="newEmail" name="newEmail" required />
-        </div>
-        <button id="submit-button" type="submit">Submit</button>
-      </form>
+    <div>
+      <h1 class="title">About</h1>
+      <p class="content">Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem.
+
+        Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a,</p>
     </div>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-          fetch("/userData")
-            .then((response) => response.json())
-            .then((data) => {
-              document.getElementById("email").value = data.email;
-            });
-        });
       fetch("/isLoggedIn")
         .then((response) => response.json())
         .then((data) => {
@@ -62,6 +46,6 @@
             document.querySelector(".logged-in").style.display = "none";
           }
         });
-      </script>
+    </script>
   </body>
 </html>

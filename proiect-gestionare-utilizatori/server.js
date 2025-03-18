@@ -98,32 +98,36 @@ app.post("/updateEmail", (req, res) => {
 });
 
 app.post("/updatePassword", async (req, res) => {
-  const { password, newPassword } = req.body;
+  const { password, newPassword, confirmPassword } = req.body;
   if (req.session.user) {
-    const currentEmail = req.session.user.email;
-    db.get(
-      "SELECT * FROM users WHERE email = ?",
-      [currentEmail],
-      async (error, row) => {
-        if (error) {
-          return res.status(500).json({ error: error.message });
-        }
-        if (row) {
-          const match = await comparePasswords(password, row.password);
-          const hashedPassword = await hashPassword(newPassword);
-          if (match) {
-            db.run("UPDATE users SET password = ? WHERE email = ?", [
-              hashedPassword,
-              currentEmail,
-            ]);
-            req.session.user.password = hashedPassword;
-            return res.redirect("/profile");
-          } else {
-            return res.status(400).json({ error: "Incorrect password" });
+    if (newPassword === confirmPassword) {
+      const currentEmail = req.session.user.email;
+      db.get(
+        "SELECT * FROM users WHERE email = ?",
+        [currentEmail],
+        async (error, row) => {
+          if (error) {
+            return res.status(500).json({ error: error.message });
+          }
+          if (row) {
+            const match = await comparePasswords(password, row.password);
+            const hashedPassword = await hashPassword(newPassword);
+            if (match) {
+              db.run("UPDATE users SET password = ? WHERE email = ?", [
+                hashedPassword,
+                currentEmail,
+              ]);
+              req.session.user.password = hashedPassword;
+              return res.redirect("/profile");
+            } else {
+              return res.status(400).json({ error: "Incorrect password" });
+            }
           }
         }
-      }
-    );
+      );
+    } else{
+      return res.status(400).json({ error: "Passwords not match" });
+    }
   } else {
     res.redirect("/login");
   }

@@ -6,6 +6,9 @@ const app = express();
 const sqlite3 = require("sqlite3").verbose();
 const PORT = 3000;
 const { hashPassword, comparePasswords } = require("./assets/js/script.js");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
+const dotenv = require("dotenv").config();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(
@@ -15,6 +18,30 @@ app.use(
     saveUninitialized: true,
   })
 );
+app.use(cookieParser());
+
+function verifyToken(req, res, next) {
+  let token;
+  if (req.cookies && req.cookies.token) {
+    token = req.cookies.token;
+    console.log("token", token);
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = decoded;
+      console.log(req.user);
+      next();
+    } catch (error) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+  }
+  if (!token) {
+    return res.status(401).json({ error: "Unauthorized, no token" });
+  }
+}
+
+const generateToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
+};
 
 const db = new sqlite3.Database("usersDB.db");
 db.run(
@@ -52,7 +79,8 @@ app.post("/login", async (req, res) => {
     if (row) {
       const match = await comparePasswords(password, row.password);
       if (match) {
-        req.session.user = row;
+        const token = generateToken(row.id);
+        res.cookie("token", token, { expiresIn: "30d", httpOnly: true });
         return res.redirect("/profile");
       } else {
         return res.status(400).json({ error: "Invalid credentials" });
@@ -63,74 +91,79 @@ app.post("/login", async (req, res) => {
   });
 });
 
-app.get("/profile", (req, res) => {
-  if (req.session.user) {
-    res.sendFile(path.join(__dirname, "/pages/profile.html"));
-  } else {
-    res.redirect("/login");
-  }
+app.get("/profile", verifyToken, (req, res) => {
+  res.sendFile(path.join(__dirname, "/pages/profile.html"));
 });
 
-app.get("/userData", (req, res) => {
-  if (req.session.user) {
+app.get("/userData", verifyToken, (req, res) => {
+  const userId = req.user.id;
+  db.get("SELECT email FROM users WHERE id = ?", [userId], (error, row) => {
+    if (error) {
+      console.error("DB error", error.message);
+      return res.status(500).json({ error: "DB error" });
+    }
     res.json({
-      email: req.session.user.email,
-      password: req.session.user.password,
+      email: row.email,
     });
-  } else {
-    res.status(401).json({ error: "User not logged in" });
-  }
+  });
 });
 
-app.post("/updateEmail", (req, res) => {
+app.post("/updateEmail", verifyToken, (req, res) => {
   const { newEmail } = req.body;
-  if (req.session.user) {
-    const currentEmail = req.session.user.email;
-    db.run("UPDATE users SET email = ? WHERE email = ?", [
-      newEmail,
-      currentEmail,
-    ]);
-    req.session.user.email = newEmail;
+  if (req.user.id) {
+    const userId = req.user.id;
+    db.run("UPDATE users SET email = ? WHERE id = ?", [newEmail, userId]);
     res.redirect("/profile");
   } else {
     res.redirect("/login");
   }
 });
 
-app.post("/updatePassword", async (req, res) => {
-  const { password, newPassword } = req.body;
-  if (req.session.user) {
-    const currentEmail = req.session.user.email;
-    db.get(
-      "SELECT * FROM users WHERE email = ?",
-      [currentEmail],
-      async (error, row) => {
-        if (error) {
-          return res.status(500).json({ error: error.message });
-        }
-        if (row) {
-          const match = await comparePasswords(password, row.password);
-          const hashedPassword = await hashPassword(newPassword);
-          if (match) {
-            db.run("UPDATE users SET password = ? WHERE email = ?", [
-              hashedPassword,
-              currentEmail,
-            ]);
-            req.session.user.password = hashedPassword;
-            return res.redirect("/profile");
-          } else {
-            return res.status(400).json({ error: "Incorrect password" });
+app.post("/updatePassword", verifyToken, async (req, res) => {
+  const { password, newPassword, confirmPassword } = req.body;
+  if (req.user) {
+    if (newPassword === confirmPassword) {
+      const userId = req.user.id;
+      db.get(
+        "SELECT * FROM users WHERE id = ?",
+        [userId],
+        async (error, row) => {
+          if (error) {
+            return res.status(500).json({ error: error.message });
+          }
+          if (row) {
+            const match = await comparePasswords(password, row.password);
+            const hashedPassword = await hashPassword(newPassword);
+            if (match) {
+              db.run("UPDATE users SET password = ? WHERE id = ?", [
+                hashedPassword,
+                userId,
+              ]);
+              return res.redirect("/profile");
+            } else {
+              return res.status(400).json({ error: "Incorrect password" });
+            }
           }
         }
-      }
-    );
+      );
+    } else {
+      return res.status(400).json({ error: "Passwords not match" });
+    }
   } else {
     res.redirect("/login");
   }
 });
 
+app.get("/isLoggedIn", (req, res) => {
+  if (req.cookies && req.cookies.token) {
+    res.json({ loggedIn: true });
+  } else {
+    res.json({ loggedIn: false });
+  }
+});
+
 app.get("/logout", (req, res) => {
-  req.session.destroy();
+  res.clearCookie("token");
   res.redirect("/login");
 });
 
@@ -144,6 +177,14 @@ app.get("/", (req, res) => {
 
 app.get("/login", (req, res) => {
   res.sendFile(path.join(__dirname, "/pages/login.html"));
+});
+
+app.get("/about", (req, res) => {
+  res.sendFile(path.join(__dirname, "/pages/about.html"));
+});
+
+app.get("/help", (req, res) => {
+  res.sendFile(path.join(__dirname, "/pages/help.html"));
 });
 
 app.get("/register", (req, res) => {

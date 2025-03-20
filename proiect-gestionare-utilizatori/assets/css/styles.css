@@ -6,9 +6,68 @@ body {
     background-color: #ffffff;
 }
 
-header{
-    background-color: #211C84;
-    height: 120px;
+nav {
+    background-color: #44b5e9;
+    height: 100px;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    align-items: center;
+}
+
+.logo {
+    margin-left: 25px;
+    color: white;
+}
+.menu-buttons{
+    margin-left: 40px;
+}
+
+.menu-button {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: white;
+    padding: 15px 30px 15px 30px;
+}
+
+.menu-button:hover {
+    background-color: #3ca4d4;
+}
+
+.user-buttons {
+    margin-right: 25px;
+}
+
+#login-button {
+    color: white;
+    margin-right: 5px;
+    font-size: 20px;
+    padding: 15px 30px 15px 30px;
+}
+#login-button:hover{
+    background-color: #3ca4d4;
+}
+
+#register-button:hover{
+    background-color: #e4e4e6;
+}
+
+#register-button {
+    background-color: white;
+    color:#44b5e9;
+    font-size: 20px;
+    padding: 10px;
+    border-radius: 10px;
+}
+.title{
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+}
+.content{
+    padding: 30px;
 }
 .box {
     display: flex;
@@ -22,12 +81,6 @@ header{
     font-size: 40px;
 }
 
-nav {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    align-items: center;
-}
 
 #button-group {
     display: flex;
@@ -39,14 +92,14 @@ nav {
 
 a {
     text-decoration: none;
-    margin-top: 30px;
+    /* margin-top: 30px;
     padding: 15px;
     font-size: 23px;
     border-radius: 10px;
     width: 100px;
     display: inline-flex;
     justify-content: center; 
-    align-items: center; 
+    align-items: center;  */
 }
 
 #fill-button {
@@ -69,7 +122,7 @@ a {
     background-color: #e4e4e6;
 }
 
-#profile-button{
+#profile-button {
     width: 260px;
     border: 2px solid #211C84;
     color: #211C84;
@@ -83,27 +136,27 @@ a {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    height:15vh;
+    height: 15vh;
     margin-top: -100px;
 }
 
-#input{
+#input {
     display: flex;
     flex-direction: column;
     font-size: 18px;
-    color:#878c8c;
+    color: #878c8c;
     margin-top: 10px;
 }
 
 input {
-    width:250px;
-    height:30px;
+    width: 250px;
+    height: 30px;
     border-radius: 5px;
     border: 2px solid #211C84;
     margin-top: 5px;
 }
 
-#submit-button{
+#submit-button {
     background-color: #211C84;
     border: 2px solid #211C84;
     color: white;
@@ -117,33 +170,33 @@ input {
     background-color: #15115a;
 }
 
-#edit-email-button{
+#edit-email-button {
     padding: 10px;
     font-size: 18px;
     border-radius: 10px;
     width: 150px;
     display: inline-flex;
-    justify-content: center; 
-    align-items: center; 
+    justify-content: center;
+    align-items: center;
     border: 2px solid #211C84;
     color: #211C84;
     background-color: white;
     cursor: pointer;
 }
 
-#edit-pass-button{
+#edit-pass-button {
     padding: 10px;
     font-size: 18px;
     border-radius: 10px;
     width: 150px;
     display: inline-flex;
-    justify-content: center; 
-    align-items: center; 
+    justify-content: center;
+    align-items: center;
     border: 2px solid #211C84;
     color: white;
     background-color: #211C84;
     cursor: pointer;
-    margin-left:15px;
+    margin-left: 15px;
 }
 
 #edit-pass-button:hover {
@@ -154,12 +207,12 @@ input {
     background-color: #e4e4e6;
 }
 
-#welcome-message{
+#welcome-message {
     font-size: 23px;
     margin-top: -10px;
 }
 
-#logout-button{
+#logout-button {
     width: 320px;
     border: 2px solid #211C84;
     color: #211C84;
@@ -167,8 +220,8 @@ input {
     font-size: 18px;
     border-radius: 10px;
     display: inline-flex;
-    justify-content: center; 
-    align-items: center; 
+    justify-content: center;
+    align-items: center;
     margin-top: -70px;
     background-color: white;
     cursor: pointer;

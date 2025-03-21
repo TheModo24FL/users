@@ -5,10 +5,15 @@ const path = require("path");
 const app = express();
 const sqlite3 = require("sqlite3").verbose();
 const PORT = 3000;
-const { hashPassword, comparePasswords } = require("./assets/js/script.js");
+const {
+  hashPassword,
+  comparePasswords,
+  sendResetEmail,
+} = require("./assets/js/script.js");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const dotenv = require("dotenv").config();
+const crypto = require("crypto");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(
@@ -24,11 +29,9 @@ function verifyToken(req, res, next) {
   let token;
   if (req.cookies && req.cookies.token) {
     token = req.cookies.token;
-    console.log("token", token);
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       req.user = decoded;
-      console.log(req.user);
       next();
     } catch (error) {
       return res.status(401).json({ error: "Unauthorized" });
@@ -39,11 +42,17 @@ function verifyToken(req, res, next) {
   }
 }
 
+function generateResetToken() {
+  return crypto.randomBytes(20).toString("hex");
+}
+
+const tokens = {};
+
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
 };
 
-const db = new sqlite3.Database("usersDB.db");
+const db = new sqlite3.Database("users_DB.db");
 db.run(
   `CREATE TABLE IF NOT EXISTS users ( id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT, password TEXT)`
 );
@@ -89,6 +98,61 @@ app.post("/login", async (req, res) => {
       return res.status(400).json({ error: "Invalid credentials" });
     }
   });
+});
+
+app.post("/sendResetLink", (req, res) => {
+  const { email } = req.body;
+  db.get("SELECT * FROM users WHERE email = ?", [email], (error, row) => {
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+    if (row) {
+      const token = generateResetToken();
+      tokens[token] = email;
+      sendResetEmail(email, token);
+      return res.redirect("/login");
+    } else {
+      return res
+        .status(400)
+        .json({ error: "There is no user associated with this email." });
+    }
+  });
+});
+
+app.get("/resetPassword/:token", (req, res) => {
+  const token = req.params.token;
+  const resetEmail = tokens[token];
+  if (!resetEmail) {
+    return res.status(400).json({ error: "Invalid token." });
+  }
+  res.sendFile(path.join(__dirname, "/pages/resetPassword.html"));
+});
+
+app.post("/resetPassword", (req, res) => {
+  const { token, newPassword, confirmPassword } = req.body;
+  const resetEmail = tokens[token];
+  db.get(
+    "SELECT * FROM users WHERE email = ?",
+    [resetEmail],
+    async (error, row) => {
+      if (error) {
+        return res.status(500).json({ error: error.message });
+      }
+      if (row) {
+        if (newPassword === confirmPassword){
+        const hashedPassword = await hashPassword(newPassword);
+        db.run("UPDATE users SET password = ? WHERE email = ?", [
+          hashedPassword,
+          resetEmail,
+        ]);
+        delete tokens[token];
+        return res.redirect("/login");
+      }
+    else{
+      return res.status(400).json({ error: "Passwords do not match." });
+    }}
+    }
+  );
 });
 
 app.get("/profile", verifyToken, (req, res) => {
@@ -185,6 +249,10 @@ app.get("/about", (req, res) => {
 
 app.get("/help", (req, res) => {
   res.sendFile(path.join(__dirname, "/pages/help.html"));
+});
+
+app.get("/forgotPassword", (req, res) => {
+  res.sendFile(path.join(__dirname, "/pages/forgotPassword.html"));
 });
 
 app.get("/register", (req, res) => {
